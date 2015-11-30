@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "MK64F12.h"
+#include "common.h"
 
 #ifndef PIT_H
 #define PIT_H
@@ -11,7 +11,8 @@ void startPIT0(void  (*T0ISR)(), int ldVal);
 void startPIT1(void  (*T1ISR)(), int ldVal);
 void stopPIT0(void);
 void stopPIT1(void);
-void PIT_IRQHandler(void);
+void PIT0_IRQHandler(void);
+void PIT1_IRQHandler(void);
 
 
 #endif

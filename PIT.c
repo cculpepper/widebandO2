@@ -15,7 +15,7 @@ void startPIT0(void  (*T0ISR)(void), int ldVal){
 	/*[>PIT_TCTRL0 = 0xC0000000;<]*/
 	/*[>PIT_TCTRL0 |= PIT_TEN;<]*/
 	/*enable_irq(INT_PIT - 16);*/
-	NVIC_EnableIRQ(PIT_IRQn);
+	NVIC_EnableIRQ(PIT0_IRQn);
 	__enable_irq();
 }
 void startPIT1(void  (*T1ISR)(void), int ldVal){
@@ -30,7 +30,7 @@ void startPIT1(void  (*T1ISR)(void), int ldVal){
 	/*[>PIT_TCTRL0 = 0xC0000000;<]*/
 	/*[>PIT_TCTRL0 |= PIT_TEN;<]*/
 	/*enable_irq(INT_PIT - 16);*/
-	NVIC_EnableIRQ(PIT_IRQn);
+	NVIC_EnableIRQ(PIT1_IRQn);
 	__enable_irq();
 }
 
@@ -42,16 +42,17 @@ void stopPIT1(void){
 	PIT->CHANNEL[1].TCTRL = 0;
 	//NVIC_DisableIRQ(PIT_IRQn);
 }
-void PIT_IRQHandler(void){
+void PIT0_IRQHandler(void){
 
 	__disable_irq();
-	if (PIT->CHANNEL[0].TFLG){
-		PIT->CHANNEL[0].TFLG = 1;
-		PITData.T0ISR();
-	}
-	if (PIT->CHANNEL[1].TFLG){
-		PIT->CHANNEL[1].TFLG = 1;
-		PITData.T1ISR();
-	}
+	PIT->CHANNEL[0].TFLG = 1;
+	PITData.T0ISR();
+	__enable_irq();
+}
+void PIT1_IRQHandler(void){
+
+	__disable_irq();
+	PIT->CHANNEL[0].TFLG = 1;
+	PITData.T0ISR();
 	__enable_irq();
 }

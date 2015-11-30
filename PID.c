@@ -156,5 +156,3 @@ float PIDUpdate(struct PIDDataStruct *PIDData, float input) {
 }
 #endif
 
-	int main() {
-	}
