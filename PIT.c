@@ -52,7 +52,7 @@ void PIT0_IRQHandler(void){
 void PIT1_IRQHandler(void){
 
 	__disable_irq();
-	PIT->CHANNEL[0].TFLG = 1;
+	PIT->CHANNEL[1].TFLG = 1;
 	PITData.T0ISR();
 	__enable_irq();
 }

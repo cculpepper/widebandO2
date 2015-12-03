@@ -1,13 +1,13 @@
 /*
-* Rochester Institute of Technology
-* Department of Computer Engineering
-*  CMPE 460  Interfacing Digital Electronics
-Spring 2015
+ * Rochester Institute of Technology
+ * Department of Computer Engineering
+ *  CMPE 460  Interfacing Digital Electronics
+ Spring 2015
 
-*
-*
-* Filename: main.c
-*/
+ *
+ *
+ * Filename: main.c
+ */
 
 #include "common.h"
 #include "adc.h"
@@ -17,15 +17,16 @@ Spring 2015
  * 63 Sholud be DP3 on ADC1. Also is DP0 on ADC0. 
  * Going to use for 
  * 4e should be se14 on ADC1.
+ * Use for the Nernst output
  * 4f should be se15 on ADC1.
  * */ 
 const uint8_t ADC1SourceBytes[ADC1_NUM_SOURCES] = {0x60, 0x63, 0x4E, 0x4F};
 volatile int ADC1ResultIndex;
 void DAC0_INIT(void) {
-		//Enable DAC clock
-		SIM_SCGC2 |= SIM_SCGC2_DAC0_MASK;
-		DAC0_C0 = DAC_C0_DACEN_MASK | DAC_C0_DACRFS_MASK;
-		DAC0_C1 = 0;
+	//Enable DAC clock
+	SIM_SCGC2 |= SIM_SCGC2_DAC0_MASK;
+	DAC0_C0 = DAC_C0_DACEN_MASK | DAC_C0_DACRFS_MASK;
+	DAC0_C1 = 0;
 }
 
 void PDB_INIT(void) {
@@ -45,11 +46,12 @@ void ADC1_INIT(void) {
 	SIM_SCGC3 |= SIM_SCGC3_ADC1_MASK;
 
 	ADC1ResultIndex = 0;
-
+	/* Uses the Bus clock. */ 
 	// Configure CFG Registers
 	// Configure ADC to divide 50 MHz down to 6.25 MHz AD Clock, 16-bit single ended
 	//(Insert your code here.)
-	ADC1->CFG1 = ADC_CFG1_ADIV(3) | ADC_CFG1_MODE(11);
+	//adiv3 is divide by 8, cfgmode3 is 16 bits. We dont need 16 bits... We need 8
+	ADC1->CFG1 = ADC_CFG1_ADIV(3) | ADC_CFG1_MODE(3);
 
 
 	// Do ADC Calibration for Singled Ended ADC. Do not touch.
@@ -64,6 +66,15 @@ void ADC1_INIT(void) {
 	calib = calib >> 1;
 	calib |= 0x8000;
 	ADC1_PG = calib;
+	calib = ADC1_CLM0;
+	calib += ADC1_CLM1;
+	calib += ADC1_CLM2;
+	calib += ADC1_CLM3;
+	calib += ADC1_CLM4;
+	calib += ADC1_CLMS;
+	calib = calib >> 1;
+	calib |= 0x8000;
+	ADC1_MG = calib;
 
 	// Configure SC registers.
 	// Select hardware trigger.
@@ -74,9 +85,10 @@ void ADC1_INIT(void) {
 	// Configure SC1A register.
 	// Select ADC Channel and enable interrupts. Use ADC1 channel DAD3  in single ended mode.
 	//(Insert your code here.)
-	ADC1_SC1A = 0x43;//ADC_SC1_ADCH(3) | ADC_SC1_AIEN_MASK;
 
+	ADC1ResultIndex = 0;
 
+	ADC1_SC1A = ADC1SourceBytes[ADC1ResultIndex];
 	// Enable NVIC interrupt
 	NVIC_EnableIRQ(ADC1_IRQn);//ADC1 Interrupt
 	__enable_irq();
@@ -90,39 +102,11 @@ void ADC1_IRQHandler(void) {
 		ADC1ResultIndex = 0;
 		ADC1_SC1A = ADC1SourceBytes[ADC1ResultIndex];
 		return;
-	ADC1Results[ADC1ResultIndex++] = ADC1_RA;
-	ADC1_SC1A = ADC1SourceBytes[ADC1ResultIndex];
-	__enable_irq();
-	if (ADC1ResultIndex == ADC1_NUM_SOURCES){
-		ADC1ResultIndex = 0;
+		ADC1Results[ADC1ResultIndex++] = ADC1_RA;
+		ADC1_SC1A = ADC1SourceBytes[ADC1ResultIndex];
+		__enable_irq();
+		if (ADC1ResultIndex == ADC1_NUM_SOURCES){
+			ADC1ResultIndex = 0;
+		}
 	}
-}
-
-int notmain(void) {
-	unsigned int i; char str[100];
-	float c,f;
-	//c=(ADC1_RA * 3.3 / (0xffff)) * 0.02;
-	// Enable UART Pins
-	uart_init();
-
-	DAC0_INIT();
-	ADC1_INIT();
-	PDB_INIT();
-
-	// Start the PDB (ADC Conversions)
-	PDB0_SC |= PDB_SC_SWTRIG_MASK;
-
-	for(;;) {}{
-		i = ADC1_RA;
-		c=(i/200.0)-48.0;//(i * 3.3 / (2<<12))*10;
-		f = (c * 1.8) + 32;
-		sprintf(str,"\n Celcius: %f farenheit: %f                \r",c,f);
-		//sprintf(str,"\n Decimal: %d Hexadecimal: %x                \r",ADC1_RA,ADC1_RA);
-		uart_putstring(str);
-		for( i=0; i < 5000000; ++i ){
-
-	}
-}
-
-return 0;
 }

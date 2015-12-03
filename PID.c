@@ -156,3 +156,39 @@ float PIDUpdate(struct PIDDataStruct *PIDData, float input) {
 }
 #endif
 
+
+#ifdef PID_USE_FLOAT
+float PIDSetGoal(struct PIDDataStruct *PIDData, float goal, float input) {
+	float error;
+	int i;
+	float output;
+	float deriv;
+	float integral;
+	PIDData->goal = goal;
+	integral = 0;
+	if (input > PIDData->inputHigh) {
+		input = PIDData->inputHigh;
+	} else if (input < PIDData->inputLow) {
+		input = PIDData->inputLow;
+	}
+
+	error = PIDData->goal - input;
+	deriv = error - PIDData->lastErrs[0];
+	for (i = 0; i < (LAST_VALUE_SIZE - 1); i++) {
+		PIDData->lastErrs[i + 1] = PIDData->lastErrs[i];
+		integral += PIDData->lastErrs[i + 1];
+	}
+	integral *= PIDData->timeBetweenUpdates;
+	PIDData->lastErrs[0] = error;
+	output = PIDData->kp * error;
+	output += PIDData->kd * deriv;
+	output += PIDData->ki * integral;
+	if (output > PIDData->outputHigh) {
+		output = PIDData->outputHigh;
+	} else if (output < PIDData->outputLow) {
+		output = PIDData->outputLow;
+	}
+	return output;
+}
+#endif
+

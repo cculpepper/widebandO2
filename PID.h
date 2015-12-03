@@ -61,6 +61,8 @@ signed int PIDUpdate(struct PIDDataStruct *PIDData, unsigned int input) ;
 
 #ifdef PID_USE_FLOAT
 float PIDUpdate(struct PIDDataStruct *PIDData, float input) ;
+float PIDSetGoal(struct PIDDataStruct *PIDData, float input, float goal) ;
+
 #endif
 
 

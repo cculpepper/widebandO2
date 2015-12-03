@@ -33,15 +33,14 @@ static unsigned int chan2Freq = 0;
  * @param Frequency (~1000 Hz to 20000 Hz)
  * @param dir: 1 for C3 active, else C2 active 
  */ 
-void SetDutyCycle2(unsigned int DutyCycle, unsigned int Frequency,
-		unsigned int dir) 
+void SetDutyCycle2(unsigned int DutyCycle) 
 {
 
 	// Calculate the new cutoff value
-	uint16_t mod = (uint16_t) (((SystemCoreClock / Frequency) * DutyCycle) / 100);
+	uint16_t mod = (uint16_t) (((SystemCoreClock / chan2Freq) * DutyCycle) / 100);
 	FTM0_C2V = mod;
 	// Update the clock to the new frequency
-	FTM0_MOD = (CLOCK / Frequency);
+	FTM0_MOD = (CLOCK / chan2Freq);
 
 }
 
