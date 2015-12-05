@@ -1,1 +1,3 @@
-build/PID.o: PID.c
+build/PID.o: PID.c PID.h
+
+PID.h:

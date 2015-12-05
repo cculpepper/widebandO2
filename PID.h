@@ -2,7 +2,7 @@
 #define PID_H
 
 
-#define LAST_VALUE_SIZE 4
+#define LAST_VALUE_SIZE 1
 #undef PID_USE_INT
 #define  PID_USE_FLOAT
 #define PID_STATIC_INITIALIZE
@@ -43,25 +43,25 @@ struct PIDDataStruct {
 
 #ifdef PID_STATIC_INITIALIZE
 #ifdef PID_USE_INT
-int PIDInitialize(struct PIDDataStruct *PIDData, float kp, float kd, float ki,
+int PIDInitialize(volatile struct PIDDataStruct *PIDData, float kp, float kd, float ki,
 		  signed int goal, signed int inputHigh, signed int inputLow,
 		  signed int outputLow, signed int outputHigh,
 		  unsigned int timeBetweenUpdates);
 #endif
 #ifdef PID_USE_FLOAT
-int PIDInitialize(struct PIDDataStruct *PIDData, float kp, float kd,
+int PIDInitialize(volatile struct PIDDataStruct *PIDData, float kp, float kd,
 		  float ki, float goal, float inputHigh, float inputLow,
 		  float outputLow, float outputHigh,
 		  float timeBetweenUpdates) ;
 #endif
 #endif
 #ifdef PID_USE_INT
-signed int PIDUpdate(struct PIDDataStruct *PIDData, unsigned int input) ;
+signed int PIDUpdate(volatile struct PIDDataStruct *PIDData, unsigned int input) ;
 #endif
 
 #ifdef PID_USE_FLOAT
-float PIDUpdate(struct PIDDataStruct *PIDData, float input) ;
-float PIDSetGoal(struct PIDDataStruct *PIDData, float input, float goal) ;
+float PIDUpdate(volatile struct PIDDataStruct *PIDData, float input) ;
+float PIDSetGoal(volatile struct PIDDataStruct *PIDData, float goal) ;
 
 #endif
 

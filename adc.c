@@ -19,8 +19,10 @@
  * 4e should be se14 on ADC1.
  * Use for the Nernst output
  * 4f should be se15 on ADC1.
+ se14 is ptb10,15 is 11
  * */ 
-const uint8_t ADC1SourceBytes[ADC1_NUM_SOURCES] = {0x60, 0x63, 0x4E, 0x4F};
+const uint8_t ADC1SourceBytes[ADC1_NUM_SOURCES] = {0x60, 0x63, 0x4F, 0x4E};
+volatile int16_t ADC1Results[ADC1_NUM_SOURCES];
 volatile int ADC1ResultIndex;
 void DAC0_INIT(void) {
 	//Enable DAC clock
@@ -78,7 +80,7 @@ void ADC1_INIT(void) {
 
 	// Configure SC registers.
 	// Select hardware trigger.
-	ADC1->SC2 |= ADC_SC2_ADTRG_MASK;
+	//ADC1->SC2 |= ADC_SC2_ADTRG_MASK;
 
 
 
@@ -102,11 +104,12 @@ void ADC1_IRQHandler(void) {
 		ADC1ResultIndex = 0;
 		ADC1_SC1A = ADC1SourceBytes[ADC1ResultIndex];
 		return;
+	}
 		ADC1Results[ADC1ResultIndex++] = ADC1_RA;
 		ADC1_SC1A = ADC1SourceBytes[ADC1ResultIndex];
 		__enable_irq();
 		if (ADC1ResultIndex == ADC1_NUM_SOURCES){
 			ADC1ResultIndex = 0;
 		}
-	}
 }
+

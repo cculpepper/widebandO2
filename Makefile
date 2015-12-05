@@ -153,5 +153,5 @@ print_info:
 
 .PHONY: all clean print_info
 flash: all
-	openocd -f /usr/share/openocd/scripts/interface/jlink.cfg -c "transport select swd" -f /usr/share/openocd/scripts/target/kl25.cfg -f ocdStuff/flash.cfg
+	openocd -f /usr/share/openocd/scripts/interface/jlink.cfg -c "transport select swd" -f /usr/share/openocd/scripts/target/klx.cfg -f ocdStuff/flash.cfg
 	#openocd -f ocdStuff/kinetis.cfg

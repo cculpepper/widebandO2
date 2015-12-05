@@ -16,7 +16,7 @@
 #define CLOCK					20485760u
 #define PWM_FREQUENCY			1000
 #define FTM0_MOD_VALUE			(CLOCK/PWM_FREQUENCY)
-/* Use the SystemCoreClock variable. */ 
+/* Use the DEFAULT_BUS_CLOCK variable. */ 
 /* This module uses the system clock. */ 
 #define FTM_MAX_MOD 
 
@@ -37,10 +37,10 @@ void SetDutyCycle2(unsigned int DutyCycle)
 {
 
 	// Calculate the new cutoff value
-	uint16_t mod = (uint16_t) (((SystemCoreClock / chan2Freq) * DutyCycle) / 100);
+	uint16_t mod = (uint16_t) (((DEFAULT_BUS_CLOCK / chan2Freq) * DutyCycle) / 100);
 	FTM0_C2V = mod;
 	// Update the clock to the new frequency
-	FTM0_MOD = (CLOCK / chan2Freq);
+	//FTM0_MOD = (CLOCK / chan2Freq);
 
 }
 
@@ -49,7 +49,7 @@ void SetDutyCycle2(unsigned int DutyCycle)
 /*
  * Initialize the FlexTimer for PWM
  */ 
-void InitPWM2(uint32_t frequency) 
+int InitPWM2(uint32_t frequency) 
 {
 	int i;
 	int divider;
@@ -80,11 +80,11 @@ void InitPWM2(uint32_t frequency)
 	FTM0_CNTIN = 0;
 	
 	found = 0;
-	if ((SystemCoreClock / frequency) > ((1<<16)-1)){
+	if ((DEFAULT_BUS_CLOCK / frequency) > ((1<<16)-1)){
 		/* Then we must divide the thing to make the tihing work. */ 
 		for (i=0;i<8;i++){
 			divider = (1<<i);
-			if (((SystemCoreClock / frequency)/divider) < ((1<<16)-1)){ 
+			if (((DEFAULT_BUS_CLOCK / frequency)/divider) < ((1<<16)-1)){ 
 				found = i;
 				break;
 			}
@@ -96,7 +96,7 @@ void InitPWM2(uint32_t frequency)
 	}
 
 	chan2Freq = frequency;
-	chan2Mod = ((SystemCoreClock / divider) / frequency);
+	chan2Mod = ((DEFAULT_BUS_CLOCK / divider) / frequency);
 	
 	// 39.3.3 FTM Setup
 	// Set prescale value to 1 

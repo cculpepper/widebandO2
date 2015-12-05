@@ -1,63 +1,45 @@
-#define LAST_VALUE_SIZE 4
+#include "PID.h"
 #undef PID_USE_INT
 #define  PID_USE_FLOAT
 #define PID_STATIC_INITIALIZE
 #define PID_INT_FACTOR_BITS 10
 #define PID_INT signed int32_t
 
-#ifdef PID_USE_INT
-/* For ints, I was thinking about multiplying the inputs by 100 or 1000.
- * That way, no floating point math.
- * Also, am going to add input low to all values, to make them all positive*/
-struct PIDDataStruct {
-	signed int kp;
-	signed int kd;
-	signed int ki;
-	unsigned int goal;
-	signed int inputHigh;
-	signed int inputLow;
-	signed int outputHigh;
-	signed int outputLow;
-	unsigned int timeBetweenUpdates;
-	signed int lastErrs[LAST_VALUE_SIZE];
-};
-#endif
-#ifdef PID_USE_FLOAT
-struct PIDDataStruct {
-	float kp;
-	float kd;
-	float ki;
-	float goal;
-	float inputHigh;
-	float inputLow;
-	float outputHigh;
-	float outputLow;
-	float timeBetweenUpdates;
-	float lastErrs[LAST_VALUE_SIZE];
-};
-#endif
-
 #ifdef PID_STATIC_INITIALIZE
 #ifdef PID_USE_INT
-int PIDInitialize(struct PIDDataStruct *PIDData, float kp, float kd, float ki,
+int PIDInitialize(volatile struct PIDDataStruct *PIDData, float kp, float kd, float ki,
 		  signed int goal, signed int inputHigh, signed int inputLow,
 		  signed int outputLow, signed int outputHigh,
 		  unsigned int timeBetweenUpdates){
 	int i;
-	PIDData->kp = kp;
-	PIDData->kd = kd;
-	PIDData->ki = ki;
-	PIDData->goal = (goal << PID_INT_FACTOR_BITS);
-#endif
-#ifdef PID_USE_FLOAT
-int PIDInitialize(struct PIDDataStruct *PIDData, float kp, float kd,
-		  float ki, float goal, float inputHigh, float inputLow,
-		  float outputLow, float outputHigh,
-		  float timeBetweenUpdates) {
-	int i;
 	PIDData->kp = (int)(kp * (1 << PID_INT_FACTOR_BITS));
 	PIDData->ki = (int)(ki * (1 << PID_INT_FACTOR_BITS));
 	PIDData->kd = (int)(kd * (1 << PID_INT_FACTOR_BITS));
+	PIDData->goal = (goal << PID_INT_FACTOR_BITS);
+#endif
+#ifdef PID_USE_FLOAT
+int PIDInitialize(volatile struct PIDDataStruct *PIDData, float kp, float kd,
+		  float ki, float goal, float inputHigh, float inputLow,
+		  float outputLow, float outputHigh,
+		  float timeBetweenUpdates) {
+				int i;
+	PIDData->kp = kp;
+	PIDData->kd = kd;
+	PIDData->ki = ki;
+				// So the internal representation of the goal needs to be scaled. 
+					goal -= inputLow;
+				// Divide the goal by the input high to make it scaled to 1.
+				if ((inputHigh-inputLow) > 1){
+					goal /= (inputHigh-inputLow);
+				} else {
+					goal *= (inputHigh-inputLow);
+				}
+	
+	if (goal > inputHigh) {
+		goal = inputHigh;
+	} else if (goal < inputLow) {
+		goal = inputLow;
+	}
 	PIDData->goal = goal;
 #endif
 #endif
@@ -73,7 +55,7 @@ int PIDInitialize(struct PIDDataStruct *PIDData, float kp, float kd,
 }
 
 #ifdef PID_USE_INT
-signed int PIDUpdate(struct PIDDataStruct *PIDData, unsigned int input) {
+signed int PIDUpdate(volatile struct PIDDataStruct *PIDData, unsigned int input) {
 	unsigned int error;
 	int i;
 	unsigned int output;
@@ -123,7 +105,7 @@ signed int PIDUpdate(struct PIDDataStruct *PIDData, unsigned int input) {
 #endif
 
 #ifdef PID_USE_FLOAT
-float PIDUpdate(struct PIDDataStruct *PIDData, float input) {
+float PIDUpdate(volatile struct PIDDataStruct *PIDData, float input) {
 	float error;
 	int i;
 	float output;
@@ -135,7 +117,15 @@ float PIDUpdate(struct PIDDataStruct *PIDData, float input) {
 	} else if (input < PIDData->inputLow) {
 		input = PIDData->inputLow;
 	}
-
+// Need to scale the input from 0 to 1.
+	// subtract the input low to make it positive (Will also bring the input down to zero if positive
+	input -= PIDData->inputLow;
+	// Divide the input by the input high to make it scaled to 1.
+	if ((PIDData->inputHigh-PIDData->inputLow) > 1){
+		input /= (PIDData->inputHigh-PIDData->inputLow);
+	} else {
+		input /= (PIDData->inputHigh-PIDData->inputLow);
+	}
 	error = PIDData->goal - input;
 	deriv = error - PIDData->lastErrs[0];
 	for (i = 0; i < (LAST_VALUE_SIZE - 1); i++) {
@@ -147,6 +137,14 @@ float PIDUpdate(struct PIDDataStruct *PIDData, float input) {
 	output = PIDData->kp * error;
 	output += PIDData->kd * deriv;
 	output += PIDData->ki * integral;
+	//Scale to the range
+	// So because we can have negatives, rescale to zero and 1
+	output += 1;
+	output *= .5;
+	
+	
+	output *= (PIDData->outputHigh - PIDData->outputLow);
+	output += (PIDData->outputLow);
 	if (output > PIDData->outputHigh) {
 		output = PIDData->outputHigh;
 	} else if (output < PIDData->outputLow) {
@@ -158,37 +156,19 @@ float PIDUpdate(struct PIDDataStruct *PIDData, float input) {
 
 
 #ifdef PID_USE_FLOAT
-float PIDSetGoal(struct PIDDataStruct *PIDData, float goal, float input) {
-	float error;
-	int i;
-	float output;
-	float deriv;
-	float integral;
-	PIDData->goal = goal;
-	integral = 0;
-	if (input > PIDData->inputHigh) {
-		input = PIDData->inputHigh;
-	} else if (input < PIDData->inputLow) {
-		input = PIDData->inputLow;
-	}
+float PIDSetGoal(volatile struct PIDDataStruct *PIDData, float goal) {
 
-	error = PIDData->goal - input;
-	deriv = error - PIDData->lastErrs[0];
-	for (i = 0; i < (LAST_VALUE_SIZE - 1); i++) {
-		PIDData->lastErrs[i + 1] = PIDData->lastErrs[i];
-		integral += PIDData->lastErrs[i + 1];
+	if (goal > PIDData->inputHigh) {
+		goal = PIDData->inputHigh;
+	} else if (goal < PIDData->inputLow) {
+		goal = PIDData->inputLow;
 	}
-	integral *= PIDData->timeBetweenUpdates;
-	PIDData->lastErrs[0] = error;
-	output = PIDData->kp * error;
-	output += PIDData->kd * deriv;
-	output += PIDData->ki * integral;
-	if (output > PIDData->outputHigh) {
-		output = PIDData->outputHigh;
-	} else if (output < PIDData->outputLow) {
-		output = PIDData->outputLow;
-	}
-	return output;
+	// Need to scale the input from 0 to 1.
+	// subtract the input low to make it positive (Will also bring the input down to zero if positive
+	goal -= PIDData->inputLow;
+	goal /= (PIDData->inputHigh-PIDData->inputLow);
+	PIDData->goal = goal;
+	return 0;
 }
 #endif
 

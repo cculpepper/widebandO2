@@ -23,5 +23,6 @@ void ADC1_INIT(void) ;
 void ADC1_IRQHandler(void) ;
 #define ADC1_NUM_SOURCES 4
 const extern uint8_t ADC1SourceBytes[ADC1_NUM_SOURCES];
-volatile int16_t ADC1Results[ADC1_NUM_SOURCES];
+volatile extern int ADC1ResultIndex;
+volatile extern int16_t ADC1Results[ADC1_NUM_SOURCES];
 #endif

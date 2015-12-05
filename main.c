@@ -14,9 +14,9 @@
 
 int main(void);
 
-struct PIDDataStruct heaterPID;
-struct PIDDataStruct pumpCurrentPID;
-struct PIDDataStruct nernstVoltagePID;
+volatile struct PIDDataStruct heaterPID;
+volatile struct PIDDataStruct pumpCurrentPID;
+volatile struct PIDDataStruct nernstVoltagePID;
 float pumpCurrentMeasured;
 float pumpCurrentDesired;
 int pumpCurrentDutyCycle;
@@ -28,10 +28,11 @@ int main(){
 	int pitldval;
 	char buf[1000];
 	int pitClock;
+	InitPWM2(1000);
 	LedPortInit();
 	LedDirInit();
 	ledGOn();
-	ledBOff();
+	ledBOn();
 	ADC1_INIT();
 	if(SystemCoreClock == 120000000u){
 		pitClock = 60000000u;
@@ -44,13 +45,13 @@ int main(){
 /* Use the heaterPID, proportion of 0.5, no derivative, .01 integral, shoot for 
  * 80 ohms of resistance on the nernst cell, with a max and min, Output between 
  * 0 and 100. I promise I'll update every milisecond...*/ 
-	PIDInitialize(&nernstVoltagePID, .5, 0, 0, 
-			.45, 0, 1,
+	PIDInitialize(&nernstVoltagePID, 8, 0, 0, 
+			.45, 3.3, 0,
 			-.01, .01, .001);
 /* The above PID takes the nernst voltage, and produces a desired current
  * that will be driven into the pump. */ 
-	PIDInitialize(&pumpCurrentPID, .1, 0, 0,  
-			0, -0.01, 0.01,
+	PIDInitialize(&pumpCurrentPID, 1, 0, 0,  
+			0, 0.01, -0.01,
 			0, 100, .001);
 	nernstR = 0;
 	pumpCurrentMeasured = 0;
@@ -58,28 +59,136 @@ int main(){
 	heaterDutyCycle = 0;
 
 
+	
+	
+	
+	
+	/*
+	
+	
+	
+	pumpCurrentDesired = PIDUpdate(&nernstVoltagePID, .1);
+	pumpCurrentMeasured = .01;
+	if (pumpCurrentMeasured>3.3) pumpCurrentMeasured = 3.3;
+	PIDSetGoal(&pumpCurrentPID, pumpCurrentDesired);
+	pumpCurrentDutyCycle = PIDUpdate(&pumpCurrentPID, pumpCurrentMeasured);
+
+	
+	pumpCurrentDesired = PIDUpdate(&nernstVoltagePID, .45);
+	pumpCurrentMeasured = .01;
+	if (pumpCurrentMeasured>3.3) pumpCurrentMeasured = 3.3;
+	PIDSetGoal(&pumpCurrentPID, pumpCurrentDesired);
+	pumpCurrentDutyCycle = PIDUpdate(&pumpCurrentPID, pumpCurrentMeasured);
+
+	
+	pumpCurrentDesired = PIDUpdate(&nernstVoltagePID, 1);
+	pumpCurrentMeasured = .01;
+	if (pumpCurrentMeasured>3.3) pumpCurrentMeasured = 3.3;
+	PIDSetGoal(&pumpCurrentPID, pumpCurrentDesired);
+	pumpCurrentDutyCycle = PIDUpdate(&pumpCurrentPID, pumpCurrentMeasured);
+
+	
+	pumpCurrentDesired = PIDUpdate(&nernstVoltagePID, .1);
+	pumpCurrentMeasured = -.01;
+	if (pumpCurrentMeasured>3.3) pumpCurrentMeasured = 3.3;
+	PIDSetGoal(&pumpCurrentPID, pumpCurrentDesired);
+	pumpCurrentDutyCycle = PIDUpdate(&pumpCurrentPID, pumpCurrentMeasured);
+
+	
+	pumpCurrentDesired = PIDUpdate(&nernstVoltagePID, .45);
+	pumpCurrentMeasured = -.01;
+	if (pumpCurrentMeasured>3.3) pumpCurrentMeasured = 3.3;
+	PIDSetGoal(&pumpCurrentPID, pumpCurrentDesired);
+	pumpCurrentDutyCycle = PIDUpdate(&pumpCurrentPID, pumpCurrentMeasured);
+
+	
+	
+	pumpCurrentDesired = PIDUpdate(&nernstVoltagePID, 1);
+	pumpCurrentMeasured = -.01;
+	if (pumpCurrentMeasured>3.3) pumpCurrentMeasured = 3.3;
+	PIDSetGoal(&pumpCurrentPID, pumpCurrentDesired);
+	pumpCurrentDutyCycle = PIDUpdate(&pumpCurrentPID, pumpCurrentMeasured);
+
+	
+	
+	pumpCurrentDesired = PIDUpdate(&nernstVoltagePID, .1);
+	pumpCurrentMeasured = 0;
+	if (pumpCurrentMeasured>3.3) pumpCurrentMeasured = 3.3;
+	PIDSetGoal(&pumpCurrentPID, pumpCurrentDesired);
+	pumpCurrentDutyCycle = PIDUpdate(&pumpCurrentPID, pumpCurrentMeasured);
+
+	
+	pumpCurrentDesired = PIDUpdate(&nernstVoltagePID, .45);
+	pumpCurrentMeasured = 0;
+	if (pumpCurrentMeasured>3.3) pumpCurrentMeasured = 3.3;
+	PIDSetGoal(&pumpCurrentPID, pumpCurrentDesired);
+	pumpCurrentDutyCycle = PIDUpdate(&pumpCurrentPID, pumpCurrentMeasured);
+
+	
+	
+	pumpCurrentDesired = PIDUpdate(&nernstVoltagePID, 1);
+	pumpCurrentMeasured = 0;
+	if (pumpCurrentMeasured>3.3) pumpCurrentMeasured = 3.3;
+	PIDSetGoal(&pumpCurrentPID, pumpCurrentDesired);
+	pumpCurrentDutyCycle = PIDUpdate(&pumpCurrentPID, pumpCurrentMeasured);
+
+		
+	*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	pitldval = pitClock / 1000;
 /* Set up the PIT to trigger 100 times a second. */ 
 	startPIT0(updatePIDs, pitldval);
 	LedPortInit();
 	LedDirInit();
-
+uart_init();
 	for(;;){
-		sprintf((char*) buf, "Measured Nernst Output Voltage: %f\t PumpCurrent Duty Cycle %u\t Pump Current Measured: %f\r\n", nernstVoltage, pumpCurrentDutyCycle,  nernstVoltage);
+		ledGOn();
+		sprintf((char*) buf, "Measured Nernst V %f\t PumpCurrent DC %u\t Measured PumpCurrent: %f \t DesiredPumpCurrent %f  \r", nernstVoltage, pumpCurrentDutyCycle,  pumpCurrentMeasured, pumpCurrentDesired);
+		//sprintf((char*) buf, "%d\t%d\t%d\t%d\t\r\n", ADC1Results[0], ADC1Results[1],ADC1Results[2],ADC1Results[3]);
+		//sprintf((char*) buf, "in: %d\tout: %f", ADC1Results[0],(3.3 * (float) ADC1Results[0]) / (float)(1<<15));
+		//buf[100] = 0;
+		uart_putstring("                                                                                                                                           \r");
+		uart_putstring((char*) buf);
 		ledRToggle();
 		ledGOff();
 	}
 
 }
 void updatePIDs(){
-	int pumpCurrent = ADC1Results[0];
-	int nernstOut = ADC1Results[2];
-	nernstVoltage = (3.3 * (float) nernstOut) / (2^16);
-	pumpCurrentDesired = (int) PIDUpdate(&nernstVoltagePID, nernstVoltage);
-	pumpCurrentMeasured = (3.3 * (float) pumpCurrent) / (2^16);
-	pumpCurrentDutyCycle = PIDSetGoal(&pumpCurrentPID, pumpCurrentMeasured, pumpCurrentDesired);
+	int16_t pumpCurrent = ADC1Results[0];
+	uint16_t nernstOut = ADC1Results[2];
+	nernstVoltage = (3.3 * (float) nernstOut) / (float)(1<<16);
+	if (nernstVoltage>3.3) nernstVoltage = 3.3;
+	pumpCurrentDesired = PIDUpdate(&nernstVoltagePID, nernstVoltage);
+	pumpCurrentMeasured = (3.3 * (float) pumpCurrent) / (1<<15);
+	if (pumpCurrentMeasured>3.3) pumpCurrentMeasured = 3.3;
+	// Desired pump current runs from -.01 to .01.
+	// Need to go from zero to 100. 
+	// From range of .02 -> 100, Mult by 5000
+	// Then add 50
+	pumpCurrentDutyCycle = pumpCurrentDesired * 5000.0;
+	pumpCurrentDutyCycle = pumpCurrentDutyCycle +50;
+	if (pumpCurrentDutyCycle > 105) pumpCurrentDutyCycle =105;
+	if (pumpCurrentDutyCycle < 1) pumpCurrentDutyCycle = 1;
+	
 	SetDutyCycle2(pumpCurrentDutyCycle);
-
+		ADC1ResultIndex = 0;
+		ADC1_SC1A = ADC1SourceBytes[ADC1ResultIndex];
 
 
 
