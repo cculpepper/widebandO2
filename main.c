@@ -156,25 +156,34 @@ int main(){
 	LedPortInit();
 	LedDirInit();
 uart_init();
+ledBOff();
+ledROff();
+ledGOff();
 	for(;;){
-		ledGOn();
 		sprintf((char*) buf, "Measured Nernst V %f\t PumpCurrent DC %u\t Measured PumpCurrent: %f \t DesiredPumpCurrent %f  \r", nernstVoltage, pumpCurrentDutyCycle,  pumpCurrentMeasured, pumpCurrentDesired);
 		//sprintf((char*) buf, "%d\t%d\t%d\t%d\t\r\n", ADC1Results[0], ADC1Results[1],ADC1Results[2],ADC1Results[3]);
 		//sprintf((char*) buf, "in: %d\tout: %f", ADC1Results[0],(3.3 * (float) ADC1Results[0]) / (float)(1<<15));
 		//buf[100] = 0;
 		uart_putstring("                                                                                                                                           \r");
 		uart_putstring((char*) buf);
-		ledRToggle();
-		ledGOff();
+		//ledGToggle();
 	}
 
 }
 void updatePIDs(){
 	int16_t pumpCurrent = ADC1Results[0];
-	uint16_t nernstOut = ADC1Results[2];
-	nernstVoltage = (3.3 * (float) nernstOut) / (float)(1<<16);
+	int16_t nernstOut = ADC1Results[1];
+	nernstVoltage = (3.3 * (float) nernstOut) / (float)(1<<15);
 	if (nernstVoltage>3.3) nernstVoltage = 3.3;
 	pumpCurrentDesired = PIDUpdate(&nernstVoltagePID, nernstVoltage);
+	if (pumpCurrentDesired < 0){
+		ledROn();
+		ledBOff();
+	} else {
+		ledBOn();
+		ledROff();
+	} 
+		
 	pumpCurrentMeasured = (3.3 * (float) pumpCurrent) / (1<<15);
 	if (pumpCurrentMeasured>3.3) pumpCurrentMeasured = 3.3;
 	// Desired pump current runs from -.01 to .01.

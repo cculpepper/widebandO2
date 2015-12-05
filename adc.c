@@ -15,7 +15,7 @@
 /* 60 Should be DP0 on ADC1. 
  * Going to use for Pump current
  * 63 Sholud be DP3 on ADC1. Also is DP0 on ADC0. 
- * Going to use for 
+ * Going to use for Nernst output
  * 4e should be se14 on ADC1.
  * Use for the Nernst output
  * 4f should be se15 on ADC1.
