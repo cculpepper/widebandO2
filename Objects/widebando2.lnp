@@ -1,0 +1,17 @@
+--cpu Cortex-M4.fp
+".\objects\adc.o"
+".\objects\dac.o"
+".\objects\delay.o"
+".\objects\i2c.o"
+".\objects\main.o"
+".\objects\pid.o"
+".\objects\pit.o"
+".\objects\pwm.o"
+".\objects\queue.o"
+".\objects\sin.o"
+".\objects\uart.o"
+".\objects\startup_mk64f12.o"
+".\objects\system_mk64f12.o"
+--ro-base 0x00000000 --entry 0x00000000 --rw-base 0x20000000 --entry Reset_Handler --first __Vectors --strict --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\widebando2.map" -o .\Objects\widebando2.axf
