@@ -1,0 +1,150 @@
+Cmp-Mod V01 Created by Cvpcb (after 2015-may-01 BZR unknown)-product   date = Sun 06 Dec 2015 12:59:14 EST
+
+BeginCmp
+TimeStamp = /56647413;
+Reference = C1;
+ValeurCmp = 1uf;
+IdModule  = Capacitors_ThroughHole:C_Rect_L4_W2.5_P2.5;
+EndCmp
+
+BeginCmp
+TimeStamp = /56647B51;
+Reference = C2;
+ValeurCmp = 1uf;
+IdModule  = Capacitors_ThroughHole:C_Rect_L4_W2.5_P2.5;
+EndCmp
+
+BeginCmp
+TimeStamp = /56647B1C;
+Reference = C3;
+ValeurCmp = 1uf;
+IdModule  = Capacitors_ThroughHole:C_Rect_L4_W2.5_P2.5;
+EndCmp
+
+BeginCmp
+TimeStamp = /5664816B;
+Reference = C4;
+ValeurCmp = .5u;
+IdModule  = Capacitors_ThroughHole:C_Rect_L4_W2.5_P2.5;
+EndCmp
+
+BeginCmp
+TimeStamp = /5664AD4B;
+Reference = C5;
+ValeurCmp = .5u;
+IdModule  = Capacitors_ThroughHole:C_Rect_L4_W2.5_P2.5;
+EndCmp
+
+BeginCmp
+TimeStamp = /56646F5A;
+Reference = P1;
+ValeurCmp = CONN_9;
+IdModule  = Terminal_Blocks:TerminalBlock_WAGO-804_RM5mm_9pol;
+EndCmp
+
+BeginCmp
+TimeStamp = /56647048;
+Reference = P2;
+ValeurCmp = CONN_6;
+IdModule  = Terminal_Blocks:TerminalBlock_WAGO-804_RM5mm_6pol;
+EndCmp
+
+BeginCmp
+TimeStamp = /5664BC3E;
+Reference = Q1;
+ValeurCmp = MOSFET_N;
+IdModule  = Transistors_TO-220:TO-220_FET-GDS_Vertical_MountedFromLS_LargePads;
+EndCmp
+
+BeginCmp
+TimeStamp = /5664BD0F;
+Reference = R1;
+ValeurCmp = 4.7K;
+IdModule  = Resistors_ThroughHole:Resistor_Horizontal_RM10mm;
+EndCmp
+
+BeginCmp
+TimeStamp = /56648D50;
+Reference = R2;
+ValeurCmp = 1000;
+IdModule  = Resistors_ThroughHole:Resistor_Horizontal_RM10mm;
+EndCmp
+
+BeginCmp
+TimeStamp = /566473D4;
+Reference = R3;
+ValeurCmp = 15K;
+IdModule  = Resistors_ThroughHole:Resistor_Horizontal_RM10mm;
+EndCmp
+
+BeginCmp
+TimeStamp = /56647170;
+Reference = R4;
+ValeurCmp = 10K;
+IdModule  = Resistors_ThroughHole:Resistor_Horizontal_RM10mm;
+EndCmp
+
+BeginCmp
+TimeStamp = /56648CD3;
+Reference = R5;
+ValeurCmp = 20K;
+IdModule  = Resistors_ThroughHole:Resistor_Horizontal_RM10mm;
+EndCmp
+
+BeginCmp
+TimeStamp = /5664A088;
+Reference = R6;
+ValeurCmp = 10K;
+IdModule  = Resistors_ThroughHole:Resistor_Horizontal_RM10mm;
+EndCmp
+
+BeginCmp
+TimeStamp = /56647193;
+Reference = R7;
+ValeurCmp = 20K;
+IdModule  = Resistors_ThroughHole:Resistor_Horizontal_RM10mm;
+EndCmp
+
+BeginCmp
+TimeStamp = /5664A08E;
+Reference = R8;
+ValeurCmp = 20K;
+IdModule  = Resistors_ThroughHole:Resistor_Horizontal_RM10mm;
+EndCmp
+
+BeginCmp
+TimeStamp = /5664760D;
+Reference = R9;
+ValeurCmp = 1;
+IdModule  = Resistors_ThroughHole:Resistor_Horizontal_RM10mm;
+EndCmp
+
+BeginCmp
+TimeStamp = /5664A791;
+Reference = R10;
+ValeurCmp = 150;
+IdModule  = Resistors_ThroughHole:Resistor_Horizontal_RM10mm;
+EndCmp
+
+BeginCmp
+TimeStamp = /56646FF3;
+Reference = U1;
+ValeurCmp = TL082;
+IdModule  = Housings_DIP:DIP-8__300;
+EndCmp
+
+BeginCmp
+TimeStamp = /5664800F;
+Reference = U2;
+ValeurCmp = TL082;
+IdModule  = Housings_DIP:DIP-8__300;
+EndCmp
+
+BeginCmp
+TimeStamp = /566477F0;
+Reference = U3;
+ValeurCmp = 78025;
+IdModule  = Transistors_TO-247:TO-247_Vertical_Neutral123_MountedFromLS_largePads;
+EndCmp
+
+EndListe
